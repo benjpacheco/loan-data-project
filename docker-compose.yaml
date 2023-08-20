@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+  fastapi_app:
+    build:
+      context: ./fastapi_backend 
+      dockerfile: Dockerfile
+      args:
+        USER_ID: ${USER_ID:-1000}
+    image: fastapi_app:latest
+    container_name: fastapi_app
+    restart: always
+    volumes:
+      - ./:/home/fastapi
+    ports:
+      - 9696:9696
+    networks:
+      - monitoring
+
+  streamlit_app:
+    build:
+      context: ./streamlit_frontend
+      dockerfile: Dockerfile
+    image: streamlit_app:latest
+    container_name: streamlit_app
+    restart: always
+    volumes:
+      - ./streamlit_frontend:/app
+    environment:
+      - FASTAPI_APP_HOST=fastapi_app
+    ports:
+      - 8501:8501
+    networks:
+      - monitoring
+
+  mlflow_server:
+  build:
+    context: ./src/pipelines
+    dockerfile: Dockerfile
+  image: mlflow_server:latest
+  container_name: mlflow_server
+  restart: always
+  volumes:
+    - ./:/app
+  ports:
+    - 5000:5000
+    - 5001:5001
+  networks:
+    - monitoring
+  
+  detect_drift:
+  build:
+    context: ./orchestration
+    dockerfile: Dockerfile
+  image: detect_drift:latest
+  container_name: detect_drift
+  restart: always
+  volumes:
+    - ./orchestration:/app  # Mount the directory containing detect_drift.py
+  networks:
+    - monitoring
+
+networks:
+  monitoring:
+    name: monitoring
