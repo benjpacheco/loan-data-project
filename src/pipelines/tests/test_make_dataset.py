@@ -12,6 +12,11 @@ def mock_kaggle_api():
     with patch('kaggle.api.dataset_download_files') as mock:
         yield mock
 
+# Mock the Kaggle API authentication function
+@pytest.fixture
+def mock_kaggle_auth():
+    with patch('kaggle.api.authenticate'):
+        yield
 
 # Mock the boto3.client function
 @pytest.fixture
