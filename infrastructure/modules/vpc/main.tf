@@ -35,7 +35,6 @@ resource "aws_security_group_rule" "ec2_to_rds" {
   from_port         = 5432
   to_port           = 5432
   protocol          = "tcp"
-  cidr_blocks       = [var.internal_cidr]
   source_security_group_id = aws_security_group.rds_sg.id
 }
 
