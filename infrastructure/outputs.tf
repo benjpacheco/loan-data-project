@@ -20,8 +20,16 @@ output "mlflow_db_endpoint" {
 }
 
 
+# output "mlflow_database_credentials" {
+#   value     = module.rds.mlflow_database_credentials
+#   sensitive = true
+# }
+
 output "mlflow_database_credentials" {
-  value     = module.rds.mlflow_database_credentials
+  value = jsonencode({
+    username = module.rds.mlflow_database_credentials.username,
+    password = module.rds.mlflow_database_credentials.password
+  })
   sensitive = true
 }
 

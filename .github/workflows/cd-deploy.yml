@@ -45,8 +45,8 @@ jobs:
           echo "artifact_bucket_name=$artifact_bucket_name"
 
           # Decode the credentials JSON
-          mlflow_db_username=$(echo $mlflow_db_credentials_json | jq -r '.db_username')
-          mlflow_db_password=$(echo $mlflow_db_credentials_json | jq -r '.db_password')
+          mlflow_db_username=$(echo $mlflow_db_credentials_json | jq -r '.username')
+          mlflow_db_password=$(echo $mlflow_db_credentials_json | jq -r '.password')
 
           echo "Decoded Credentials:"
           echo "mlflow_db_username=$mlflow_db_username"
