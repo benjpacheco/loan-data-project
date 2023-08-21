@@ -5,7 +5,7 @@
 The objective of this project is to predict whether a loan will default (charged off). The primary goal is to optimize for recall over precision to minimize risk and avoid bad loans.
 
 ## Project Structure
-
+```
 ├── .github/workflows
 │ ├── cd-deploy.yml
 │ ├── ci-tests.yml
@@ -45,7 +45,7 @@ The objective of this project is to predict whether a loan will default (charged
 ├── Pipfile.lock
 ├── pyproject.toml
 ├── README.md
-
+```
 
 ## Data Source
 
@@ -89,7 +89,7 @@ Terraform provisions various AWS services, including:
    - IAMFullAccess
 
 then create a new policy with the following and attach it to superuser
-
+```
 {
 	"Version": "2012-10-17",
 	"Statement": [
@@ -137,7 +137,7 @@ then create a new policy with the following and attach it to superuser
 		}
 	]
 }
-
+```
 3. Create an access key and secret key ID for the "superuser" user and add them to the repository for CI/CD pipeline.
 4. Create a Kaggle account and get the user and API key, and add them to the repository.
 5. Trigger the CI/CD pipeline by merging a commit from any feature branch into the develop branch.
