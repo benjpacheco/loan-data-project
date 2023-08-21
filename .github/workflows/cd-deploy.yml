@@ -32,14 +32,25 @@ jobs:
         working-directory: 'infrastructure'
         run: |
           terraform apply -auto-approve -var-file=terraform.tfvars
+
           mlflow_db_endpoint=$(terraform output mlflow_db_endpoint)
           mlflow_db_name=$(terraform output mlflow_database_name)
           mlflow_db_credentials_json=$(terraform output mlflow_database_credentials)
           artifact_bucket_name=$(terraform output name)
 
+          echo "Terraform Outputs:"
+          echo "mlflow_db_endpoint=$mlflow_db_endpoint"
+          echo "mlflow_db_name=$mlflow_db_name"
+          echo "mlflow_db_credentials_json=$mlflow_db_credentials_json"
+          echo "artifact_bucket_name=$artifact_bucket_name"
+
           # Decode the credentials JSON
           mlflow_db_username=$(echo $mlflow_db_credentials_json | jq -r '.db_username')
           mlflow_db_password=$(echo $mlflow_db_credentials_json | jq -r '.db_password')
+
+          echo "Decoded Credentials:"
+          echo "mlflow_db_username=$mlflow_db_username"
+          echo "mlflow_db_password=$mlflow_db_password"
 
           kaggle_username="${{ secrets.KAGGLE_USERNAME }}"
           kaggle_api_key="${{ secrets.KAGGLE_API_KEY }}"
@@ -75,6 +86,8 @@ jobs:
       - name: Get ECR Repository URI from Terraform Output
         run: |
           ecr_repo_uri=$(terraform output arn | awk -F "/" '{print $2}')
+          echo "ECR Repository URI: $ecr_repo_uri"
+
 
       - name: Push Docker Image to ECR
         run: |
@@ -99,3 +112,4 @@ jobs:
 
           # SSH into the EC2 instance and start containers
           ssh -i $ec2_private_key_path ec2-user@$ec2_public_ip 'cd /home/ec2-user/app && docker-compose up -d'
+          echo "EC2 Public IP: $ec2_public_ip"
