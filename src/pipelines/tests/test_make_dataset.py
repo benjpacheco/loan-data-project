@@ -31,9 +31,8 @@ def mock_env_user(monkeypatch):
     monkeypatch.setenv('ARTIFACT_BUCKET_NAME', 'artifacts-and-data-bp')
     monkeypatch.setenv('REFERENCE_DATA_KEY_PATH', '/ref')
 
-
 # Test download_kaggle_dataset function
-def test_download_kaggle_dataset(mock_env_user, mock_kaggle_api):
+def test_download_kaggle_dataset(mock_env_user, mock_kaggle_api, mock_kaggle_auth):
     username = 'xyz'
     key = '123455'
     download_kaggle_dataset(username, key)
