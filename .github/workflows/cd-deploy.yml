@@ -1,14 +1,12 @@
 name: CD-Deploy
-
 on:
   push:
     branches:
       - 'develop'
 
 jobs:
-  deploy:
+  build-push-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
