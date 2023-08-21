@@ -4,7 +4,7 @@ on:
     branches:
       - 'develop'
     paths:
-      - '/'
+      - '.'
 
 env:
   AWS_DEFAULT_REGION: 'us-east-2'
@@ -22,7 +22,7 @@ jobs:
           python-version: 3.9.17
 
       - name: Install dependencies
-        working-directory: '/'
+        working-directory: '.'
         run: pip install pipenv && pipenv install --dev
 
       - name: Run Unit tests
@@ -30,7 +30,7 @@ jobs:
         run: pipenv run pytest tests
 
       - name: Lint
-        working-directory: '/'
+        working-directory: '.'
         run: pipenv run pylint --recursive=y .
 
       - name: Configure AWS Credentials
@@ -41,7 +41,7 @@ jobs:
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Integration Test
-        working-directory: 'integration_test/'
+        working-directory: 'integration_test'
         run: |
           . run.sh
   tf-plan:
@@ -59,6 +59,6 @@ jobs:
 
       - name: TF plan
         id: plan
-        working-directory: 'infrastructure/'
+        working-directory: 'infrastructure'
         run:
           terraform init -backend-config="key=mlops-project.tfstate" --reconfigure && terraform plan --var-file=terraform.tfvars
