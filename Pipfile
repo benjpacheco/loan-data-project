@@ -14,11 +14,11 @@ boto3 = "==1.28.21"
 kaggle = "*"
 
 [dev-packages]
-pytest = "*"
 black = "*"
-pylint = "*"
 isort = "*"
 pre-commit = "*"
+pytest = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.9"
