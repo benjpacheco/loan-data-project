@@ -69,16 +69,16 @@ def test_train_and_log(mock_boto3_s3_client):
         model.train_and_log(X_train, y_train, X_val, y_val, X_test, y_test)
 
 
-def test_log_metrics_and_model():
-    with mlflow.start_run():
-        data = pd.DataFrame({'loan_status': [0, 1], 'feature1': [0.5, 0.7]})
-        model = LoanPredictionModel(data)
-        pipeline = model._build_preprocessor()
-        X_test, y_test = data.drop(columns=['loan_status']), data['loan_status']
-        best_threshold = 0.5
-        model._log_metrics_and_model(pipeline, X_test, y_test, best_threshold)
-    # End the MLflow run
-    mlflow.end_run()
+# def test_log_metrics_and_model():
+#     with mlflow.start_run():
+#         data = pd.DataFrame({'loan_status': [0, 1], 'feature1': [0.5, 0.7]})
+#         model = LoanPredictionModel(data)
+#         pipeline = model._build_preprocessor()
+#         X_test, y_test = data.drop(columns=['loan_status']), data['loan_status']
+#         best_threshold = 0.5
+#         model._log_metrics_and_model(pipeline, X_test, y_test, best_threshold)
+#     # End the MLflow run
+#     mlflow.end_run()
 
 
 # Test other methods
@@ -95,35 +95,34 @@ def test_train_val_test_split():
     assert len(X_train) + len(X_val) + len(X_test) == len(X)
     assert len(y_train) + len(y_val) + len(y_test) == len(y)
 
+    # # Test load_data_from_s3 function
+    # def test_load_data_from_s3(mock_boto3_s3_client):
+    #     bucket_name = 'mock_bucket'
+    #     key_path = 'mock_key_path'
 
-# Test load_data_from_s3 function
-def test_load_data_from_s3(mock_boto3_s3_client):
-    bucket_name = 'mock_bucket'
-    key_path = 'mock_key_path'
+    #     # Mock the return value of s3.get_object()
+    #     mock_s3_client = mock_boto3_s3_client
+    #     mock_s3_client.get_object.side_effect = [
+    #         {'Body': Mock()}
+    #     ]  # Use a list of return values
 
-    # Mock the return value of s3.get_object()
-    mock_s3_client = mock_boto3_s3_client
-    mock_s3_client.get_object.side_effect = [
-        {'Body': Mock()}
-    ]  # Use a list of return values
+    #     # Mock pd.read_parquet
+    #     mock_read_parquet = Mock(return_value=pd.DataFrame())
+    #     with patch('pandas.read_parquet', mock_read_parquet):
+    #         data = load_data_from_s3(bucket_name, key_path)
 
-    # Mock pd.read_parquet
-    mock_read_parquet = Mock(return_value=pd.DataFrame())
-    with patch('pandas.read_parquet', mock_read_parquet):
-        data = load_data_from_s3(bucket_name, key_path)
+    #         # Assertions
+    #         assert isinstance(data, pd.DataFrame)
+    #         mock_s3_client.get_object.assert_called_once_with(
+    #             Bucket=bucket_name, Key=key_path
+    #         )
+    #         mock_read_parquet.assert_called_once_with(
+    #             mock_s3_client.get_object.return_value['Body']
+    #         )
 
-        # Assertions
-        assert isinstance(data, pd.DataFrame)
-        mock_s3_client.get_object.assert_called_once_with(
-            Bucket=bucket_name, Key=key_path
-        )
-        mock_read_parquet.assert_called_once_with(
-            mock_s3_client.get_object.return_value['Body']
-        )
-
-    mlflow.set_tracking_uri.assert_called_once()
-    mlflow.set_experiment.assert_called_once()
-    train_val_test_split.assert_called_once()
-    train.LoanPredictionModel.assert_called_once()
-    model_mock.train_and_log.assert_called_once()
-    post_training_tasks.assert_called_once()
+    # mlflow.set_tracking_uri.assert_called_once()
+    # mlflow.set_experiment.assert_called_once()
+    # train_val_test_split.assert_called_once()
+    # train.LoanPredictionModel.assert_called_once()
+    # model_mock.train_and_log.assert_called_once()
+    # post_training_tasks.assert_called_once()

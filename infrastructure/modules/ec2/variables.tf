@@ -3,15 +3,6 @@ variable "ami_id" {
   type        = string
 }
 
-variable "mlflow_db_username" {
-  description = "The username for the database"
-}
-
-variable "mlflow_db_password" {
-  description = "The password for the database"
-  sensitive   = true
-}
-
 variable "iam_instance_profile" {
   description = "IAM instance profile name"
   type        = string

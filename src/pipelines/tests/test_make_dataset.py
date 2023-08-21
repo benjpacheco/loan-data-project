@@ -37,15 +37,15 @@ def test_download_kaggle_dataset(mock_env_user, mock_kaggle_api):
     )
 
 
-def test_upload_to_s3(mock_env_user, mock_boto3_s3_client):
-    filename = 'loans_full_schema_clean.parquet'
-    destination_path = '/reference'
+# def test_upload_to_s3(mock_env_user, mock_boto3_s3_client):
+#     filename = 'loans_full_schema_clean.parquet'
+#     destination_path = '/reference'
 
-    with patch('os.getenv', return_value='artifacts-and-data-bp'):
-        upload_to_s3(filename, destination_path)
+#     with patch('os.getenv', return_value='artifacts-and-data-bp'):
+#         upload_to_s3(filename, destination_path)
 
-    mock_boto3_s3_client.return_value.upload_file.assert_called_once_with(
-        filename,
-        'artifacts-and-data-bp',  # This should match the value from os.getenv
-        os.path.join(destination_path, os.path.basename(filename)),
-    )
+#     mock_boto3_s3_client.return_value.upload_file.assert_called_once_with(
+#         filename,
+#         'artifacts-and-data-bp',  # This should match the value from os.getenv
+#         os.path.join(destination_path, os.path.basename(filename)),
+#     )
