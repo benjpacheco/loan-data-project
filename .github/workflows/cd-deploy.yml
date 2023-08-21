@@ -31,7 +31,7 @@ jobs:
         id: tf-apply
         working-directory: 'infrastructure'
         run: |
-          terraform apply -auto-approve -var-file=variables.tfvars
+          terraform apply -auto-approve -var-file=terraform.tfvars
           mlflow_db_endpoint=$(terraform output mlflow_db_endpoint)
           mlflow_db_name=$(terraform output mlflow_database_name)
           mlflow_db_credentials_json=$(terraform output mlflow_database_credentials)
