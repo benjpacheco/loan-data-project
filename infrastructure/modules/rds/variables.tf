@@ -22,3 +22,15 @@ variable "rds_sg" {
   description = "ID of the RDS security group"
   type = any
 }
+
+variable "main_subnet_id" {
+  description = "ID of the main subnet"
+}
+
+variable "subnet_a_id" {
+  description = "ID of the main subnet"
+}
+
+variable "subnet_c_id" {
+  description = "ID of the main subnet"
+}

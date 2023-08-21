@@ -3,7 +3,7 @@ terraform {
     bucket  = "mlops-project-state-bucket-bp"
     key     = "mlops-project.tfstate"
     encrypt = true
-    region = "us-east-2"
+    region  = "us-east-2"
   }
 }
 
@@ -46,8 +46,6 @@ module "ec2" {
   region               = var.region
   ami_id               = var.ami_id
   main_subnet          = module.vpc.main_subnet
-  mlflow_db_username   = var.mlflow_db_username
-  mlflow_db_password   = var.mlflow_db_password
   iam_instance_profile = module.iam.ec2_profile_name
   allow_http           = module.vpc.allow_http
 }
@@ -59,5 +57,7 @@ module "rds" {
   fastapi_db_username = var.fastapi_db_username
   fastapi_db_password = var.fastapi_db_password
   rds_sg              = module.vpc.rds_sg
+  main_subnet_id      = module.vpc.main_subnet
+  subnet_a_id         = module.vpc.subnet_a
+  subnet_c_id         = module.vpc.subnet_c
 }
-
