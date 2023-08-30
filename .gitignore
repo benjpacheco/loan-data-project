@@ -91,3 +91,4 @@ target/
 /config
 /models
 /infrastructure/.terraform
+/mlruns

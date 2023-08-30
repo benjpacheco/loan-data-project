@@ -93,13 +93,3 @@ resource "aws_iam_role_policy" "secrets_manager_policy" {
     ]
   })
 }
-
-resource "aws_secretsmanager_secret" "fastapi_db_credentials" {
-  name = "fastapi_db_credentials"
-}
-
-resource "aws_secretsmanager_secret" "mlflow_db_credentials" {
-  name = "mlflow_db_credentials"
-}
-
-

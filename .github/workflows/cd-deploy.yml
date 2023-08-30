@@ -1,0 +1,115 @@
+name: CD-Deploy
+on:
+  push:
+    branches:
+      - 'develop'
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+        # Define the infrastructure
+      - name: TF plan
+        id: tf-plan
+        working-directory: 'infrastructure'
+        run: |
+          terraform init -backend-config="key=mlops-project.tfstate" --reconfigure && terraform plan --var-file=terraform.tfvars
+
+      - name: Terraform Apply
+        id: tf-apply
+        working-directory: 'infrastructure'
+        run: |
+          terraform apply -auto-approve -var-file=terraform.tfvars
+
+          mlflow_db_endpoint=$(terraform output mlflow_db_endpoint)
+          mlflow_db_name=$(terraform output mlflow_database_name)
+          mlflow_db_credentials_json=$(terraform output mlflow_database_credentials)
+          artifact_bucket_name=$(terraform output s3_bucket_name)
+
+          echo "Terraform Outputs:"
+          echo "mlflow_db_endpoint=$mlflow_db_endpoint"
+          echo "mlflow_db_name=$mlflow_db_name"
+          echo "mlflow_db_credentials_json=$mlflow_db_credentials_json"
+          echo "artifact_bucket_name=$artifact_bucket_name"
+
+          # Decode the credentials JSON
+          mlflow_db_username=$(echo $mlflow_db_credentials_json | jq -r '.username')
+          mlflow_db_password=$(echo $mlflow_db_credentials_json | jq -r '.password')
+
+          echo "Decoded Credentials:"
+          echo "mlflow_db_username=$mlflow_db_username"
+          echo "mlflow_db_password=$mlflow_db_password"
+
+          kaggle_username="${{ secrets.KAGGLE_USERNAME }}"
+          kaggle_api_key="${{ secrets.KAGGLE_API_KEY }}"
+
+          echo "MLFLOW_DB_ENDPOINT=$mlflow_db_endpoint" > .env
+          echo "MLFLOW_DB_NAME=$mlflow_db_name" >> .env
+          echo "MLFLOW_DB_USERNAME=$mlflow_db_username" >> .env
+          echo "MLFLOW_DB_PASSWORD=$mlflow_db_password" >> .env
+          echo "ARTIFACT_BUCKET_NAME=$artifact_bucket_name" >> .env
+          echo "KAGGLE_USERNAME=$kaggle_username" >> .env
+          echo "KAGGLE_API_KEY=$kaggle_api_key" >> .env
+          echo "TRACKING_URI=http://127.0.0.1:5000" >> .env
+          echo "REFERENCE_DATA_KEY_PATH=/reference" >> .env
+          echo "DATA_PATH=../../data" >> .env
+
+      - name: Build Docker Image for Mlflow server
+        run: docker build \
+            --build-arg MLFLOW_DB_ENDPOINT=$MLFLOW_DB_ENDPOINT \
+            --build-arg MLFLOW_DB_NAME=$MLFLOW_DB_NAME \
+            --build-arg MLFLOW_DB_USERNAME=$MLFLOW_DB_USERNAME \
+            --build-arg MLFLOW_DB_PASSWORD=$MLFLOW_DB_PASSWORD \
+            --build-arg ARTIFACT_BUCKET_NAME=$ARTIFACT_BUCKET_NAME \
+            --build-arg KAGGLE_USERNAME=$KAGGLE_USERNAME \
+            --build-arg KAGGLE_API_KEY=$KAGGLE_API_KEY \
+            -t mlflow-server:latest ./src/pipelines
+
+      - name: Build Docker images for fastapi, streamlit, drift detection
+        run: |
+          docker build -t fastapi_app:latest ./fastapi_backend
+          docker build -t streamlit_app:latest ./streamlit_frontend
+          docker build -t detect_drift:latest ./orchestration
+
+      - name: Get ECR Repository URI from Terraform Output
+        run: |
+          ecr_repo_uri=$(terraform output arn | awk -F "/" '{print $2}')
+          echo "ECR Repository URI: $ecr_repo_uri"
+
+
+      - name: Push Docker Image to ECR
+        run: |
+          $(aws ecr get-login --no-include-email --region us-east-2)  # Replace with your desired AWS region
+           # Tag and push each Docker image to ECR
+          for image_name in fastapi_app streamlit_app detect_drift mlflow-server; do
+            docker tag $image_name:latest $ecr_repo_uri:$image_name
+            docker push $ecr_repo_uri:$image_name
+          done
+
+      - name: Clone Repository to EC2 and Start Containers
+        run: |
+          # Extract EC2 instance outputs from Terraform
+          ec2_public_ip=$(terraform output ec2_instance_public_ip)
+          ec2_private_key_path=$(terraform output ec2_instance_private_key_path)
+
+          # Set permissions for the private key file
+          chmod 400 $ec2_private_key_path
+
+          # SSH into the EC2 instance and pull images
+          ssh -i $ec2_private_key_path ec2-user@$ec2_public_ip 'docker login -u AWS -p $(aws ecr get-login-password --region us-east-2) https://$ecr_repo_uri && docker pull $ecr_repo_uri:latest'
+
+          # SSH into the EC2 instance and start containers
+          ssh -i $ec2_private_key_path ec2-user@$ec2_public_ip 'cd /home/ec2-user/app && docker-compose up -d'
+          echo "EC2 Public IP: $ec2_public_ip"
