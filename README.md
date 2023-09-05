@@ -19,6 +19,10 @@ The objective of this project is to predict whether a loan will default (charged
 │ ├── variables.tf
 │ ├── modules
 │ ├── terraform.tfvars
+├── integreation_test
+│ ├── test_fastapi.py
+│ ├── docker-compose.yml
+│ ├── run.sh
 ├── notebooks
 │ ├── loan_data_modeling
 │ ├── loan_data_eda
@@ -150,4 +154,4 @@ you will also have to edit the terraform files, specifically in the IAM module
 ## Changes To Do
 
 - Fix unit tests
-- Fix linting
+

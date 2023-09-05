@@ -7,14 +7,11 @@ WORKDIR /app
 # Install Python packages
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir --ignore-installed -r requirements.txt
-RUN pip install pipenv
-RUN pipenv install --system --deploy
 
 COPY [ "app.py", "models.py", "./"]
 
 # Configure PYTHONPATH environment variable
 ENV PYTHONPATH=/home/evidently-fastapi
-
 
 EXPOSE 9696
 
