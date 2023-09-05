@@ -17,4 +17,4 @@ services:
     working_dir: /app/tests
     volumes:
       - ./tests:/app/tests
-    entrypoint: ["pytest"]
+
