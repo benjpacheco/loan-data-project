@@ -19,10 +19,11 @@ The objective of this project is to predict whether a loan will default (charged
 │ ├── variables.tf
 │ ├── modules
 │ ├── terraform.tfvars
-├── integreation_test
+├── integration_test
 │ ├── test_fastapi.py
 │ ├── docker-compose.yml
 │ ├── run.sh
+│ ├── Dockerfile
 ├── notebooks
 │ ├── loan_data_modeling
 │ ├── loan_data_eda

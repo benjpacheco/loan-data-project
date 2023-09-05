@@ -19,7 +19,7 @@ docker-compose up -d
 
 sleep 5
 
-pipenv run python test_fastapi.py
+docker-compose run test python /app/tests/test_fastapi.py
 
 ERROR_CODE=$?
 
