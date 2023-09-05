@@ -1,0 +1,20 @@
+# docker-compose.yml
+version: '3'
+
+services:
+  fastapi_app:
+    image: ${LOCAL_IMAGE_NAME}
+    ports:
+      - "9696:9696"
+    environment:
+      - BUCKET_NAME=xyz
+      - REFERENCE_DATA_KEY_PATH=zyx
+      - RUN_ID=12345
+  test:
+    image: python:3.9.17-slim
+    depends_on:
+      - fastapi_app
+    working_dir: /app/tests
+    volumes:
+      - ./tests:/app/tests
+    entrypoint: ["pytest"]

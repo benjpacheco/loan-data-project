@@ -82,7 +82,7 @@ Terraform provisions various AWS services, including:
 ## Reproducibility
 
 1. Create an AWS account.
-2. Create an IAM user called "superuser" and attach policies: 
+2. Create an IAM user called "superuser" and attach policies:
    - AmazonEC2ContainerRegistryFullAccess
    - AmazonEC2FullAccess
    - AmazonS3FullAccess
@@ -147,11 +147,7 @@ you will also have to edit the terraform files, specifically in the IAM module
 6. Wait for AWS services to be provisioned by Terraform.
 7. Access the FastAPI prediction service using the output from Terraform: `http://<EC2_Public_IP>:9696`.
 
-## Fixes To Do
+## Changes To Do
 
-- Fix github actions error related to  jq: error (at <stdin>:1): Cannot index string with string "username"
-Error: Process completed with exit code 5.
-- Fix tests
+- Fix unit tests
 - Fix linting
-- Perform integration tests
-

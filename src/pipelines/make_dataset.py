@@ -12,7 +12,10 @@ REFERENCE_DATA_KEY_PATH = os.environ.get(
 )
 
 
-def download_kaggle_dataset(username, key, data_path=DATA_PATH):
+def download_kaggle_dataset(
+    username: str, key: str, data_path: str = DATA_PATH
+) -> None:
+    """Download dataset from Kaggle using provided credentials."""
     os.environ['KAGGLE_USERNAME'] = username
     os.environ['KAGGLE_KEY'] = key
     kaggle.api.dataset_download_files(
@@ -20,7 +23,10 @@ def download_kaggle_dataset(username, key, data_path=DATA_PATH):
     )
 
 
-def upload_to_s3(filename, destination_path, bucket_name=ARTIFACT_BUCKET_NAME):
+def upload_to_s3(
+    filename: str, destination_path: str, bucket_name: str = ARTIFACT_BUCKET_NAME
+) -> None:
+    """Upload a file to the specified S3 bucket."""
     s3 = boto3.client('s3')
     s3.upload_file(
         filename,
@@ -29,7 +35,8 @@ def upload_to_s3(filename, destination_path, bucket_name=ARTIFACT_BUCKET_NAME):
     )
 
 
-def clean_and_process_data(df):
+def clean_and_process_data(df: pd.DataFrame) -> pd.DataFrame:
+    """Clean and preprocess the given DataFrame."""
     df2 = df.drop(
         columns=[
             'annual_income_joint',
@@ -49,6 +56,7 @@ def clean_and_process_data(df):
         median_value = df2[column].median()
         df2[column].fillna(median_value, inplace=True)
 
+    # Handle missing values and categorical mapping
     df2['emp_title'] = df2['emp_title'].fillna('unemployed')
     df2['num_accounts_120d_past_due'] = df2['num_accounts_120d_past_due'].fillna(0)
     df2['loan_status'].replace(
@@ -64,20 +72,22 @@ def clean_and_process_data(df):
     return df2
 
 
-def main(args):
-    download_kaggle_dataset(args.username, args.key)
+def main(arguments: argparse.Namespace) -> None:
+    """Main function to execute the processing pipeline."""
+    # Download the dataset from Kaggle
+    download_kaggle_dataset(arguments.username, arguments.key)
 
-    # Load data
+    # Load data into DataFrame
     df = pd.read_csv(os.path.join(DATA_PATH, 'loans_full_schema.csv'), index_col=0)
 
-    # Clean and process data
+    # Clean and preprocess data
     df_cleaned = clean_and_process_data(df)
 
-    # Save cleaned data locally first
+    # Save cleaned data locally in parquet format
     local_filename = os.path.join(DATA_PATH, 'loans_full_schema_clean.parquet')
     df_cleaned.to_parquet(local_filename, index=None)
 
-    # Then upload cleaned data to S3
+    # Upload the cleaned data to S3
     upload_to_s3(local_filename, REFERENCE_DATA_KEY_PATH)
 
 
