@@ -88,7 +88,10 @@ Terraform provisions various AWS services, including:
    - AmazonS3FullAccess
    - IAMFullAccess
 
-then create a new policy with the following and attach it to superuser
+then create a new policy and replace <YOUR_REGION>, <YOUR_ACCOUNT_ID> and attach it to superuser
+
+you will also have to edit the terraform files, specifically in the IAM module
+
 ```
 {
 	"Version": "2012-10-17",
@@ -96,22 +99,22 @@ then create a new policy with the following and attach it to superuser
 		{
 			"Effect": "Allow",
 			"Action": "secretsmanager:DescribeSecret",
-			"Resource": "arn:aws:secretsmanager:us-east-2:579809454035:secret:*"
+			"Resource": "arn:aws:secretsmanager:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:secret:*"
 		},
 		{
-			"Effect": "Allow",
+			"Effect": "Allow",<YOUR_ACCOUNT_ID>
 			"Action": [
 				"secretsmanager:CreateSecret",
 				"secretsmanager:DeleteSecret",
 				"secretsmanager:PutSecretValue",
 				"secretsmanager:GetSecretValue"
 			],
-			"Resource": "arn:aws:secretsmanager:us-east-2:579809454035:secret:*"
+			"Resource": "arn:aws:secretsmanager:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:secret:*"
 		},
 		{
 			"Effect": "Allow",
 			"Action": "secretsmanager:GetResourcePolicy",
-			"Resource": "arn:aws:secretsmanager:us-east-2:579809454035:secret:*"
+			"Resource": "arn:aws:secretsmanager:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:secret:*"
 		},
 		{
 			"Effect": "Allow",
@@ -129,10 +132,10 @@ then create a new policy with the following and attach it to superuser
 				"rds:ListTagsForResource"
 			],
 			"Resource": [
-				"arn:aws:rds:us-east-2:579809454035:pg:*",
-				"arn:aws:rds:us-east-2:579809454035:db:*",
-				"arn:aws:rds:us-east-2:579809454035:og:*",
-				"arn:aws:rds:us-east-2:579809454035:subgrp:rds-subnet-group"
+				"arn:aws:rds:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:pg:*",
+				"arn:aws:rds:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:db:*",
+				"arn:aws:rds:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:og:*",
+				"arn:aws:rds:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:subgrp:rds-subnet-group"
 			]
 		}
 	]
@@ -144,7 +147,7 @@ then create a new policy with the following and attach it to superuser
 6. Wait for AWS services to be provisioned by Terraform.
 7. Access the FastAPI prediction service using the output from Terraform: `http://<EC2_Public_IP>:9696`.
 
-## Fixes
+## Fixes To Do
 
 - Fix github actions error related to  jq: error (at <stdin>:1): Cannot index string with string "username"
 Error: Process completed with exit code 5.
