@@ -67,16 +67,16 @@ jobs:
           echo "DATA_PATH=../../data" >> "$GITHUB_ENV"
 
       - name: Build Docker Image for Mlflow server
-        run: docker build \
-            --build-arg MLFLOW_DB_ENDPOINT="$MLFLOW_DB_ENDPOINT" \
-            --build-arg MLFLOW_DB_NAME="$MLFLOW_DB_NAME" \
-            --build-arg MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" \
-            --build-arg MLFLOW_DB_PASSWORD="$MLFLOW_DB_PASSWORD" \
-            --build-arg ARTIFACT_BUCKET_NAME="$ARTIFACT_BUCKET_NAME" \
-            --build-arg KAGGLE_USERNAME="$KAGGLE_USERNAME" \
-            --build-arg KAGGLE_API_KEY="$KAGGLE_API_KEY" \
-            -t mlflow-server:latest \
-            --no-cache ./src/pipelines
+        run: |
+          docker build \
+          --build-arg MLFLOW_DB_ENDPOINT="$MLFLOW_DB_ENDPOINT" \
+          --build-arg MLFLOW_DB_NAME="$MLFLOW_DB_NAME" \
+          --build-arg MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" \
+          --build-arg MLFLOW_DB_PASSWORD="$MLFLOW_DB_PASSWORD" \
+          --build-arg ARTIFACT_BUCKET_NAME="$ARTIFACT_BUCKET_NAME" \
+          --build-arg KAGGLE_USERNAME="$KAGGLE_USERNAME" \
+          --build-arg KAGGLE_API_KEY="$KAGGLE_API_KEY" \
+          --tag mlflow-server:latest ./src/pipelines
 
       - name: Build Docker images for fastapi, streamlit, drift detection
         run: |
