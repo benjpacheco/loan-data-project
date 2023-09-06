@@ -18,5 +18,5 @@ services:
       - fastapi_app
     working_dir: /app/tests
     volumes:
-      - ./integration_test:/app/tests
+      - ./integration_test:/app/integration_test
 
