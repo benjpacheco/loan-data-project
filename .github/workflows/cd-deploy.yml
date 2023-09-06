@@ -55,16 +55,16 @@ jobs:
           kaggle_username="${{ secrets.KAGGLE_USERNAME }}"
           kaggle_api_key="${{ secrets.KAGGLE_API_KEY }}"
 
-          echo "MLFLOW_DB_ENDPOINT=$mlflow_db_endpoint" > .env
-          echo "MLFLOW_DB_NAME=$mlflow_db_name" >> .env
-          echo "::add-mask::MLFLOW_DB_USERNAME=$mlflow_db_username" >> .env
-          echo "::add-mask::MLFLOW_DB_PASSWORD=$mlflow_db_password" >> .env
-          echo "ARTIFACT_BUCKET_NAME=$artifact_bucket_name" >> .env
-          echo "KAGGLE_USERNAME=$kaggle_username" >> .env
-          echo "KAGGLE_API_KEY=$kaggle_api_key" >> .env
-          echo "TRACKING_URI=http://127.0.0.1:5000" >> .env
-          echo "REFERENCE_DATA_KEY_PATH=/reference" >> .env
-          echo "DATA_PATH=../../data" >> .env
+          echo "MLFLOW_DB_ENDPOINT=$mlflow_db_endpoint" >> "$GITHUB_ENV"
+          echo "MLFLOW_DB_NAME=$mlflow_db_name" >> "$GITHUB_ENV"
+          echo "::add-mask::MLFLOW_DB_USERNAME=$mlflow_db_username" >> "$GITHUB_ENV"
+          echo "::add-mask::MLFLOW_DB_PASSWORD=$mlflow_db_password" >> "$GITHUB_ENV"
+          echo "ARTIFACT_BUCKET_NAME=$artifact_bucket_name" >> "$GITHUB_ENV"
+          echo "KAGGLE_USERNAME=$kaggle_username" >> "$GITHUB_ENV"
+          echo "KAGGLE_API_KEY=$kaggle_api_key" >> "$GITHUB_ENV"
+          echo "TRACKING_URI=http://127.0.0.1:5000" >> "$GITHUB_ENV"
+          echo "REFERENCE_DATA_KEY_PATH=/reference" >> "$GITHUB_ENV"
+          echo "DATA_PATH=../../data" >> "$GITHUB_ENV"
 
       - name: Build Docker Image for Mlflow server
         run: docker build \
