@@ -1,5 +1,4 @@
 import os
-import argparse
 
 import boto3
 import kaggle
@@ -13,11 +12,9 @@ REFERENCE_DATA_KEY_PATH = os.environ.get(
 
 
 def download_kaggle_dataset(
-    username: str, key: str, data_path: str = DATA_PATH
+    data_path: str = DATA_PATH
 ) -> None:
     """Download dataset from Kaggle using provided credentials."""
-    os.environ['KAGGLE_USERNAME'] = username
-    os.environ['KAGGLE_KEY'] = key
     kaggle.api.dataset_download_files(
         'utkarshx27/lending-club-loan-dataset', path=data_path, unzip=True
     )
@@ -72,10 +69,10 @@ def clean_and_process_data(df: pd.DataFrame) -> pd.DataFrame:
     return df2
 
 
-def main(arguments: argparse.Namespace) -> None:
+def main() -> None:
     """Main function to execute the processing pipeline."""
     # Download the dataset from Kaggle
-    download_kaggle_dataset(arguments.username, arguments.key)
+    download_kaggle_dataset()
 
     # Load data into DataFrame
     df = pd.read_csv(os.path.join(DATA_PATH, 'loans_full_schema.csv'), index_col=0)
@@ -92,11 +89,4 @@ def main(arguments: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Download and process Lending Club Loan dataset from Kaggle"
-    )
-    parser.add_argument("--username", required=True, help="Your Kaggle username")
-    parser.add_argument("--key", required=True, help="Your Kaggle API key")
-
-    args = parser.parse_args()
-    main(args)
+    main()
