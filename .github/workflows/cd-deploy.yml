@@ -68,14 +68,15 @@ jobs:
 
       - name: Build Docker Image for Mlflow server
         run: docker build -t mlflow-server:latest ./src/pipelines
-        with: build-args: |
-          MLFLOW_DB_ENDPOINT="$MLFLOW_DB_ENDPOINT" 
-          MLFLOW_DB_NAME="$MLFLOW_DB_NAME" 
-          MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" 
-          MLFLOW_DB_PASSWORD="$MLFLOW_DB_PASSWORD" 
-          ARTIFACT_BUCKET_NAME="$ARTIFACT_BUCKET_NAME" 
-          KAGGLE_USERNAME="$KAGGLE_USERNAME" 
-          KAGGLE_API_KEY="$KAGGLE_API_KEY" 
+        with: 
+          build-args: |
+            MLFLOW_DB_ENDPOINT="$MLFLOW_DB_ENDPOINT" 
+            MLFLOW_DB_NAME="$MLFLOW_DB_NAME" 
+            MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" 
+            MLFLOW_DB_PASSWORD="$MLFLOW_DB_PASSWORD" 
+            ARTIFACT_BUCKET_NAME="$ARTIFACT_BUCKET_NAME" 
+            KAGGLE_USERNAME="$KAGGLE_USERNAME" 
+            KAGGLE_API_KEY="$KAGGLE_API_KEY" 
 
       - name: Build Docker images for fastapi, streamlit, drift detection
         run: |
