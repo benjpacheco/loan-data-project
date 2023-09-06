@@ -6,7 +6,14 @@ disable = [
     "missing-class-docstring",
     "missing-module-docstring",
     "invalid-name",
-    "too-few-public-methods"
+    "too-few-public-methods",
+    "too-many-instance-attributes",
+    "line-too-long",
+    "too-many-arguments",
+    "broad-exception-caught",
+    "import-error",
+    "duplicate-code",
+    "ungrouped-imports"
 ]
 
 [tool.black]
