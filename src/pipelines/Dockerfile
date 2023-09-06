@@ -34,10 +34,11 @@ ENV MLFLOW_SERVER_PORT="5000"
 ENV MLFLOW_BACKEND_URI="postgresql://$MLFLOW_DB_USERNAME:$MLFLOW_DB_PASSWORD@$MLFLOW_DB_ENDPOINT:5432/$MLFLOW_DB_NAME"
 ENV MLFLOW_ARTIFACT_ROOT="s3://$ARTIFACT_BUCKET_NAME"
 
-RUN echo $KAGGLE_USERNAME && echo $KAGGLE_API_KEY
 
-# Run make_dataset.py
-RUN python make_dataset.py --username $KAGGLE_USERNAME --key $KAGGLE_API_KEY
+RUN mkdir -p /root/.kaggle && echo '{"username":"'$KAGGLE_USERNAME'","key":"'$KAGGLE_API_KEY'"}' > /root/.kaggle/kaggle.json && chmod 600 /root/.kaggle/kaggle.json
+
+# Now you can run make_dataset.py without passing in the username and key (since you've already set the environment variables and created kaggle.json)
+RUN python make_dataset.py
 
 # Copy the entrypoint.sh script into the container
 COPY entrypoint.sh /app/entrypoint.sh
