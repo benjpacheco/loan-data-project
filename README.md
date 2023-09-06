@@ -151,6 +151,11 @@ you will also have to edit the terraform files, specifically in the IAM module
 5. Trigger the CI/CD pipeline by merging a commit from any feature branch into the develop branch.
 6. Wait for AWS services to be provisioned by Terraform.
 7. Access the FastAPI prediction service using the output from Terraform: `http://<EC2_Public_IP>:9696`.
+8. Destroy AWS resources: 
+```
+terraform init -backend-config="key=mlops-project.tfstate" --reconfigure
+terraform destroy -var-file=terraform.tfvars
+```
 
 ## Changes To Do
 
