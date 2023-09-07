@@ -39,6 +39,8 @@ RUN mkdir -p /root/.kaggle && \
     echo "{\"username\":\"$KAGGLE_USERNAME\",\"key\":\"$KAGGLE_API_KEY\"}" > /root/.kaggle/kaggle.json && \
     chmod 600 /root/.kaggle/kaggle.json
 
+RUN cat /root/.kaggle/kaggle.json
+
 # Now you can run make_dataset.py without passing in the username and key (since you've already set the environment variables and created kaggle.json)
 RUN python make_dataset.py
 

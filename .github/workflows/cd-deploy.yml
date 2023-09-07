@@ -68,7 +68,7 @@ jobs:
 
       - name: Build Docker Image for Mlflow server
         run: |
-          docker build \
+          docker build --no-cache \
           --build-arg MLFLOW_DB_ENDPOINT="$MLFLOW_DB_ENDPOINT" \
           --build-arg MLFLOW_DB_NAME="$MLFLOW_DB_NAME" \
           --build-arg MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" \
