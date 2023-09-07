@@ -55,6 +55,8 @@ jobs:
           kaggle_username="${{ secrets.KAGGLE_USERNAME }}"
           kaggle_api_key="${{ secrets.KAGGLE_API_KEY }}"
 
+          echo "Length of Kaggle Username: ${#kaggle_username}"
+
           echo "MLFLOW_DB_ENDPOINT=$mlflow_db_endpoint" >> "$GITHUB_ENV"
           echo "MLFLOW_DB_NAME=$mlflow_db_name" >> "$GITHUB_ENV"
           echo "::add-mask::MLFLOW_DB_USERNAME=$mlflow_db_username" >> "$GITHUB_ENV"
@@ -65,6 +67,9 @@ jobs:
           echo "TRACKING_URI=http://127.0.0.1:5000" >> "$GITHUB_ENV"
           echo "REFERENCE_DATA_KEY_PATH=/reference" >> "$GITHUB_ENV"
           echo "DATA_PATH=../../data" >> "$GITHUB_ENV"
+
+          echo "Length of Kaggle Username 2: ${#KAGGLE_USERNAME}"
+
 
       - name: Build Docker Image for Mlflow server
         run: |
