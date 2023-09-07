@@ -62,14 +62,9 @@ jobs:
           echo "::add-mask::MLFLOW_DB_USERNAME=$mlflow_db_username" >> "$GITHUB_ENV"
           echo "::add-mask::MLFLOW_DB_PASSWORD=$mlflow_db_password" >> "$GITHUB_ENV"
           echo "ARTIFACT_BUCKET_NAME=$artifact_bucket_name" >> "$GITHUB_ENV"
-          echo "::add-mask::KAGGLE_USERNAME=$kaggle_username" >> "$GITHUB_ENV"
-          echo "::add-mask::KAGGLE_API_KEY=$kaggle_api_key" >> "$GITHUB_ENV"
           echo "TRACKING_URI=http://127.0.0.1:5000" >> "$GITHUB_ENV"
           echo "REFERENCE_DATA_KEY_PATH=/reference" >> "$GITHUB_ENV"
           echo "DATA_PATH=../../data" >> "$GITHUB_ENV"
-
-          echo "Length of Kaggle Username 2: ${#KAGGLE_USERNAME}"
-
 
       - name: Build Docker Image for Mlflow server
         run: |
@@ -79,8 +74,8 @@ jobs:
           --build-arg MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" \
           --build-arg MLFLOW_DB_PASSWORD="$MLFLOW_DB_PASSWORD" \
           --build-arg ARTIFACT_BUCKET_NAME="$ARTIFACT_BUCKET_NAME" \
-          --build-arg KAGGLE_USERNAME="$KAGGLE_USERNAME" \
-          --build-arg KAGGLE_API_KEY="$KAGGLE_API_KEY" \
+          --build-arg KAGGLE_USERNAME="$kaggle_username" \
+          --build-arg KAGGLE_API_KEY="$kaggle_api_key" \
           --tag mlflow-server:latest ./src/pipelines
 
       - name: Build Docker images for fastapi, streamlit, drift detection
