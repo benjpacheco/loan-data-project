@@ -83,8 +83,10 @@ jobs:
 
       - name: Push Docker Image to ECR
         run: |
-          $(aws ecr get-login --no-include-email --region us-east-2)  # Replace with your desired AWS region
-           # Tag and push each Docker image to ECR
+          ecr_repo_uri=$(terraform output arn | awk -F "/" '{print $2}')
+          echo "ECR Repository URI: $ecr_repo_uri"
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ecr_repo_uri
+          # Tag and push each Docker image to ECR
           for image_name in fastapi_app streamlit_app detect_drift mlflow-server; do
             docker tag $image_name:latest $ecr_repo_uri:$image_name
             docker push $ecr_repo_uri:$image_name
@@ -100,8 +102,9 @@ jobs:
           chmod 400 $ec2_private_key_path
 
           # SSH into the EC2 instance and pull images
-          ssh -i $ec2_private_key_path ec2-user@$ec2_public_ip 'docker login -u AWS -p $(aws ecr get-login-password --region us-east-2) https://$ecr_repo_uri && docker pull $ecr_repo_uri:latest'
+          ssh -i $ec2_private_key_path ec2-user@$ec2_public_ip "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ecr_repo_uri && docker pull $ecr_repo_uri:latest"
 
           # SSH into the EC2 instance and start containers
           ssh -i $ec2_private_key_path ec2-user@$ec2_public_ip 'cd /home/ec2-user/app && docker-compose up -d'
           echo "EC2 Public IP: $ec2_public_ip"
+
