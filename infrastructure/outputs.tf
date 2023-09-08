@@ -9,7 +9,9 @@ output "ec2_instance_private_key_path" {
 }
 
 
-
+output "repository_url" {
+  value = module.ecr.repository_url
+}
 output "arn" {
   value = module.ecr.arn
 }
@@ -19,11 +21,6 @@ output "mlflow_db_endpoint" {
   value = module.rds.mlflow_db_endpoint
 }
 
-
-# output "mlflow_database_credentials" {
-#   value     = module.rds.mlflow_database_credentials
-#   sensitive = true
-# }
 
 output "mlflow_database_credentials" {
   value = jsonencode({
