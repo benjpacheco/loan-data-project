@@ -35,7 +35,7 @@ jobs:
 
           mlflow_db_endpoint=$(terraform output mlflow_db_endpoint)
           mlflow_db_name=$(terraform output mlflow_database_name)
-          artifact_bucket_name=$(terraform output s3_bucket_name)
+          artifact_bucket_name=$(terraform output -raw s3_bucket_name)
 
           echo "Terraform Outputs:"
           echo "mlflow_db_endpoint=$mlflow_db_endpoint"
