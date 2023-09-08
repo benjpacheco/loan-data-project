@@ -41,7 +41,7 @@ jobs:
           mlflow_db_endpoint=$(terraform output mlflow_db_endpoint)
           mlflow_db_name=$(terraform output mlflow_database_name)
           artifact_bucket_name=$(terraform output -raw s3_bucket_name)
-          ecr_repo_uri=$(terraform output repository_url)
+          ecr_repo_uri=$(terraform output -raw repository_url)
           ec2_public_ip=$(terraform output ec2_instance_public_ip)
           ec2_private_key_path_encoded=$(echo "$(terraform output ec2_instance_private_key_path)" | base64 -w 0) 
 
