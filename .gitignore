@@ -92,3 +92,4 @@ target/
 /models
 /infrastructure/.terraform
 /mlruns
+/tests

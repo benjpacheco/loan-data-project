@@ -35,13 +35,13 @@ jobs:
 
           mlflow_db_endpoint=$(terraform output mlflow_db_endpoint)
           mlflow_db_name=$(terraform output mlflow_database_name)
-          mlflow_db_credentials_json=$(terraform output mlflow_database_credentials)
+          mlflow_db_credentials_json=$(terraform output -raw mlflow_database_credentials)
           artifact_bucket_name=$(terraform output s3_bucket_name)
 
           echo "Terraform Outputs:"
           echo "mlflow_db_endpoint=$mlflow_db_endpoint"
           echo "mlflow_db_name=$mlflow_db_name"
-          echo "mlflow_db_credentials_json=$mlflow_db_credentials_json"
+          echo "::add-mask::mlflow_db_credentials_json=$mlflow_db_credentials_json"
           echo "artifact_bucket_name=$artifact_bucket_name"
 
           # Decode the credentials JSON
@@ -49,33 +49,34 @@ jobs:
           mlflow_db_password=$(echo $mlflow_db_credentials_json | jq -r '.password')
 
           echo "Decoded Credentials:"
-          echo "mlflow_db_username=$mlflow_db_username"
-          echo "mlflow_db_password=$mlflow_db_password"
+          echo "::add-mask::mlflow_db_username=$mlflow_db_username"
+          echo "::add-mask::mlflow_db_password=$mlflow_db_password"
 
           kaggle_username="${{ secrets.KAGGLE_USERNAME }}"
           kaggle_api_key="${{ secrets.KAGGLE_API_KEY }}"
 
-          echo "MLFLOW_DB_ENDPOINT=$mlflow_db_endpoint" > .env
-          echo "MLFLOW_DB_NAME=$mlflow_db_name" >> .env
-          echo "MLFLOW_DB_USERNAME=$mlflow_db_username" >> .env
-          echo "MLFLOW_DB_PASSWORD=$mlflow_db_password" >> .env
-          echo "ARTIFACT_BUCKET_NAME=$artifact_bucket_name" >> .env
-          echo "KAGGLE_USERNAME=$kaggle_username" >> .env
-          echo "KAGGLE_API_KEY=$kaggle_api_key" >> .env
-          echo "TRACKING_URI=http://127.0.0.1:5000" >> .env
-          echo "REFERENCE_DATA_KEY_PATH=/reference" >> .env
-          echo "DATA_PATH=../../data" >> .env
+          echo "Length of Kaggle Username: ${#kaggle_username}"
+
+          echo "MLFLOW_DB_ENDPOINT=$mlflow_db_endpoint" >> "$GITHUB_ENV"
+          echo "MLFLOW_DB_NAME=$mlflow_db_name" >> "$GITHUB_ENV"
+          echo "::add-mask::MLFLOW_DB_USERNAME=$mlflow_db_username" >> "$GITHUB_ENV"
+          echo "::add-mask::MLFLOW_DB_PASSWORD=$mlflow_db_password" >> "$GITHUB_ENV"
+          echo "ARTIFACT_BUCKET_NAME=$artifact_bucket_name" >> "$GITHUB_ENV"
+          echo "TRACKING_URI=http://127.0.0.1:5000" >> "$GITHUB_ENV"
+          echo "REFERENCE_DATA_KEY_PATH=/reference" >> "$GITHUB_ENV"
+          echo "DATA_PATH=../../data" >> "$GITHUB_ENV"
 
       - name: Build Docker Image for Mlflow server
-        run: docker build \
-            --build-arg MLFLOW_DB_ENDPOINT=$MLFLOW_DB_ENDPOINT \
-            --build-arg MLFLOW_DB_NAME=$MLFLOW_DB_NAME \
-            --build-arg MLFLOW_DB_USERNAME=$MLFLOW_DB_USERNAME \
-            --build-arg MLFLOW_DB_PASSWORD=$MLFLOW_DB_PASSWORD \
-            --build-arg ARTIFACT_BUCKET_NAME=$ARTIFACT_BUCKET_NAME \
-            --build-arg KAGGLE_USERNAME=$KAGGLE_USERNAME \
-            --build-arg KAGGLE_API_KEY=$KAGGLE_API_KEY \
-            -t mlflow-server:latest ./src/pipelines
+        run: |
+          docker build --no-cache \
+          --build-arg MLFLOW_DB_ENDPOINT="$MLFLOW_DB_ENDPOINT" \
+          --build-arg MLFLOW_DB_NAME="$MLFLOW_DB_NAME" \
+          --build-arg MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" \
+          --build-arg MLFLOW_DB_PASSWORD="$MLFLOW_DB_PASSWORD" \
+          --build-arg ARTIFACT_BUCKET_NAME="$ARTIFACT_BUCKET_NAME" \
+          --build-arg KAGGLE_USERNAME="$kaggle_username" \
+          --build-arg KAGGLE_API_KEY="$kaggle_api_key" \
+          --tag mlflow-server:latest ./src/pipelines
 
       - name: Build Docker images for fastapi, streamlit, drift detection
         run: |

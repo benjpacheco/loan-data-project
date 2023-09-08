@@ -1,0 +1,21 @@
+# docker-compose.yml
+version: '3'
+
+services:
+  fastapi_app:
+    image: ${LOCAL_IMAGE_NAME}
+    ports:
+      - "9696:9696"
+    environment:
+      - BUCKET_NAME=xyz
+      - REFERENCE_DATA_KEY_PATH=zyx
+      - RUN_ID=12345
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - fastapi_app
+    volumes:
+      - .:/app
+

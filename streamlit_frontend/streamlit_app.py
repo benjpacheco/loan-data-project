@@ -1,5 +1,4 @@
 import os
-from typing import Text
 
 import requests
 import streamlit as st
@@ -89,8 +88,8 @@ def display_sidebar_header() -> None:
     with st.sidebar:
         st.image(logo, use_column_width=True)
         col1, col2 = st.columns(2)
-        repo_link: Text = '#'
-        evidently_docs: Text = 'https://docs.evidentlyai.com/'
+        repo_link: str = '#'
+        evidently_docs: str = 'https://docs.evidentlyai.com/'
         col1.markdown(
             f"<a style='display: block; text-align: center;' href={repo_link}>Source code</a>",
             unsafe_allow_html=True,
@@ -102,14 +101,14 @@ def display_sidebar_header() -> None:
         st.header('')  # add space between logo and selectors
 
 
-def display_header(report_name: Text, window_size: int) -> None:
+def display_header(name: str, size: int) -> None:
     """Display report header."""
-    st.header(f'Report: {report_name}')
-    st.caption(f'Window size: {window_size}')
+    st.header(f'Report: {name}')
+    st.caption(f'Window size: {size}')
 
 
 @st.cache_data
-def display_report(report: Text) -> Text:
+def display_report(report: str) -> str:
     """Display report."""
     components.html(report, width=1000, height=500, scrolling=True)
     return report
@@ -124,7 +123,7 @@ def display_prediction_form() -> None:
     loan_data_dict = loan_data.dict()  # Convert to dictionary for iteration
 
     for attr, value in loan_data_dict.items():
-        if isinstance(value, (str, Text)):
+        if isinstance(value, (str, str)):
             loan_data_dict[attr] = st.text_input(attr.replace('_', ' ').title(), value)
         elif isinstance(value, float):
             loan_data_dict[attr] = st.number_input(
@@ -142,7 +141,7 @@ def display_prediction_form() -> None:
             **loan_data_dict
         ).dict()  # Convert back to LoanData instance
         prediction_url = f'http://{host}:9696/predict'
-        response = requests.post(prediction_url, json=prediction_data)
+        response = requests.post(prediction_url, json=prediction_data, timeout=10)
 
         # Display the prediction result
         prediction_result = response.json().get('prediction')
@@ -155,8 +154,8 @@ if __name__ == '__main__':
     # Sidebar: Logo and links
     display_sidebar_header()
 
-    host: Text = os.getenv('FASTAPI_APP_HOST', 'fastapi_app')
-    base_route: Text = f'http://{host}:9696'
+    host: str = os.getenv('FASTAPI_APP_HOST', 'fastapi_app')
+    base_route: str = f'http://{host}:9696'
 
     try:
         window_size: int = st.sidebar.number_input(
@@ -167,8 +166,8 @@ if __name__ == '__main__':
         clicked_make_prediction: bool = st.sidebar.button(label='Make Prediction')
 
         report_selected: bool = False
-        request_url: Text = base_route
-        report_name: Text = ''
+        request_url: str = base_route
+        report_name: str = ''
 
         if clicked_model_performance:
             report_selected = True
@@ -184,9 +183,11 @@ if __name__ == '__main__':
             display_prediction_form()
 
         if report_selected:
-            resp: requests.Response = requests.get(request_url)
+            resp: requests.Response = requests.get(request_url, timeout=10)
             display_header(report_name, window_size)
             display_report(resp.content)
 
+    except requests.RequestException as req_e:
+        st.error(f"Request failed: {req_e}")
     except Exception as e:
-        st.error(e)
+        st.error(f"An unexpected error occurred: {e}")
