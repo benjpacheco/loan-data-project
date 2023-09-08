@@ -92,9 +92,10 @@ jobs:
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO_URI
           # Tag and push each Docker image to ECR
           for image_name in fastapi_app streamlit_app detect_drift mlflow-server; do
-            docker tag $image_name:latest $ECR_REPO_URI:$image_name
-            docker push $ECR_REPO_URI:$image_name
+            docker tag $image_name:latest $ECR_REPO_URI/$image_name:latest
+            docker push $ECR_REPO_URI/$image_name:latest
           done
+
 
   deploy:
     needs: build-push
