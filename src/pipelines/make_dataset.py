@@ -6,6 +6,7 @@ import pandas as pd
 
 DATA_PATH = os.environ.get("DATA_PATH", "../../data")
 ARTIFACT_BUCKET_NAME = os.environ.get("ARTIFACT_BUCKET_NAME", "artifacts-and-data-bp")
+print(ARTIFACT_BUCKET_NAME)
 REFERENCE_DATA_KEY_PATH = os.environ.get(
     "REFERENCE_DATA_KEY_PATH", "default_reference_data_key_path"
 )
@@ -25,6 +26,8 @@ def upload_to_s3(
 ) -> None:
     """Upload a file to the specified S3 bucket."""
     s3 = boto3.client('s3')
+    print(bucket_name)
+
     s3.upload_file(
         filename,
         bucket_name,
