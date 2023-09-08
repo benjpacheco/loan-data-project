@@ -35,32 +35,21 @@ jobs:
 
           mlflow_db_endpoint=$(terraform output mlflow_db_endpoint)
           mlflow_db_name=$(terraform output mlflow_database_name)
-          mlflow_db_credentials_json=$(terraform output -raw mlflow_database_credentials)
           artifact_bucket_name=$(terraform output s3_bucket_name)
 
           echo "Terraform Outputs:"
           echo "mlflow_db_endpoint=$mlflow_db_endpoint"
           echo "mlflow_db_name=$mlflow_db_name"
-          echo "::add-mask::mlflow_db_credentials_json=$mlflow_db_credentials_json"
           echo "artifact_bucket_name=$artifact_bucket_name"
+          echo "::add-mask::$(terraform output -raw mlflow_database_credentials | jq -r '.username')"
+          echo "::add-mask::$(terraform output -raw mlflow_database_credentials | jq -r '.password')"
 
-          # Decode the credentials JSON
-          mlflow_db_username=$(echo $mlflow_db_credentials_json | jq -r '.username')
-          mlflow_db_password=$(echo $mlflow_db_credentials_json | jq -r '.password')
-
-          echo "Decoded Credentials:"
-          echo "::add-mask::mlflow_db_username=$mlflow_db_username"
-          echo "::add-mask::mlflow_db_password=$mlflow_db_password"
-
-          kaggle_username="${{ secrets.KAGGLE_USERNAME }}"
-          kaggle_api_key="${{ secrets.KAGGLE_API_KEY }}"
-
-          echo "Length of Kaggle Username: ${#kaggle_username}"
 
           echo "MLFLOW_DB_ENDPOINT=$mlflow_db_endpoint" >> "$GITHUB_ENV"
           echo "MLFLOW_DB_NAME=$mlflow_db_name" >> "$GITHUB_ENV"
-          echo "::add-mask::MLFLOW_DB_USERNAME=$mlflow_db_username" >> "$GITHUB_ENV"
-          echo "::add-mask::MLFLOW_DB_PASSWORD=$mlflow_db_password" >> "$GITHUB_ENV"
+          echo "MLFLOW_DB_USERNAME=$(terraform output -raw mlflow_database_credentials | jq -r '.username')" >> "$GITHUB_ENV"
+          echo "MLFLOW_DB_PASSWORD=$(terraform output -raw mlflow_database_credentials | jq -r '.password')" >> "$GITHUB_ENV"
+
           echo "ARTIFACT_BUCKET_NAME=$artifact_bucket_name" >> "$GITHUB_ENV"
           echo "TRACKING_URI=http://127.0.0.1:5000" >> "$GITHUB_ENV"
           echo "REFERENCE_DATA_KEY_PATH=/reference" >> "$GITHUB_ENV"
@@ -74,8 +63,8 @@ jobs:
           --build-arg MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" \
           --build-arg MLFLOW_DB_PASSWORD="$MLFLOW_DB_PASSWORD" \
           --build-arg ARTIFACT_BUCKET_NAME="$ARTIFACT_BUCKET_NAME" \
-          --build-arg KAGGLE_USERNAME="$kaggle_username" \
-          --build-arg KAGGLE_API_KEY="$kaggle_api_key" \
+          --build-arg KAGGLE_USERNAME="${{ secrets.KAGGLE_USERNAME }}" \
+          --build-arg KAGGLE_API_KEY="${{ secrets.KAGGLE_API_KEY }}" \
           --tag mlflow-server:latest ./src/pipelines
 
       - name: Build Docker images for fastapi, streamlit, drift detection
