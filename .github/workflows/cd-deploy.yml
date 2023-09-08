@@ -63,6 +63,8 @@ jobs:
           --build-arg MLFLOW_DB_USERNAME="$MLFLOW_DB_USERNAME" \
           --build-arg MLFLOW_DB_PASSWORD="$MLFLOW_DB_PASSWORD" \
           --build-arg ARTIFACT_BUCKET_NAME="$ARTIFACT_BUCKET_NAME" \
+          --build-arg AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+          --build-arg AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           --build-arg KAGGLE_USERNAME="${{ secrets.KAGGLE_USERNAME }}" \
           --build-arg KAGGLE_API_KEY="${{ secrets.KAGGLE_API_KEY }}" \
           --tag mlflow-server:latest ./src/pipelines
