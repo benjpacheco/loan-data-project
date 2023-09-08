@@ -5,28 +5,33 @@ on:
       - 'develop'
 
 jobs:
-  build-push-deploy:
+  build-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # Configure AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
+
+      # Setup Terraform
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
 
-        # Define the infrastructure
+      # Define the infrastructure
       - name: TF plan
         id: tf-plan
         working-directory: 'infrastructure'
         run: |
           terraform init -backend-config="key=mlops-project.tfstate" --reconfigure && terraform plan --var-file=terraform.tfvars
 
+      # Apply Terraform configurations
       - name: Terraform Apply
         id: tf-apply
         working-directory: 'infrastructure'
@@ -38,7 +43,7 @@ jobs:
           artifact_bucket_name=$(terraform output -raw s3_bucket_name)
           ecr_repo_uri=$(terraform output arn | awk -F "/" '{print $2}')
           ec2_public_ip=$(terraform output ec2_instance_public_ip)
-          ec2_private_key_path=$(terraform output ec2_instance_private_key_path)
+          ec2_private_key_path_encoded=$(echo "$(terraform output ec2_instance_private_key_path)" | base64 -w 0) 
 
           echo "Terraform Outputs:"
           echo "mlflow_db_endpoint=$mlflow_db_endpoint"
@@ -53,16 +58,16 @@ jobs:
           echo "MLFLOW_DB_NAME=$mlflow_db_name" >> "$GITHUB_ENV"
           echo "MLFLOW_DB_USERNAME=$(terraform output -raw mlflow_database_credentials | jq -r '.username')" >> "$GITHUB_ENV"
           echo "MLFLOW_DB_PASSWORD=$(terraform output -raw mlflow_database_credentials | jq -r '.password')" >> "$GITHUB_ENV"
-
           echo "ARTIFACT_BUCKET_NAME=$artifact_bucket_name" >> "$GITHUB_ENV"
           echo "TRACKING_URI=http://127.0.0.1:5000" >> "$GITHUB_ENV"
           echo "REFERENCE_DATA_KEY_PATH=/reference" >> "$GITHUB_ENV"
           echo "DATA_PATH=../../data" >> "$GITHUB_ENV"
           echo "ECR_REPO_URI=$ecr_repo_uri" >> "$GITHUB_ENV"
           echo "EC2_PUBLIC_IP=$ec2_public_ip" >> "$GITHUB_ENV"
-          echo "EC2_PRIVATE_KEY_PATH=$ec2_private_key_path" >> "$GITHUB_ENV"
+          echo "EC2_PRIVATE_KEY_PATH_ENCODED=$ec2_private_key_path_encoded" >> "$GITHUB_ENV" # Base64 encoded
 
-      - name: Build Docker Image for Mlflow server
+      # Build Docker images
+      - name: Build Docker Images
         run: |
           docker build --no-cache \
           --build-arg MLFLOW_DB_ENDPOINT="$MLFLOW_DB_ENDPOINT" \
@@ -76,12 +81,11 @@ jobs:
           --build-arg KAGGLE_API_KEY="${{ secrets.KAGGLE_API_KEY }}" \
           --tag mlflow-server:latest ./src/pipelines
 
-      - name: Build Docker images for fastapi, streamlit, drift detection
-        run: |
           docker build -t fastapi_app:latest ./fastapi_backend
           docker build -t streamlit_app:latest ./streamlit_frontend
           docker build -t detect_drift:latest ./orchestration
 
+      # Push Docker Images to ECR
       - name: Push Docker Image to ECR
         run: |
           echo "ECR Repository URI: $ECR_REPO_URI"
@@ -92,15 +96,22 @@ jobs:
             docker push $ECR_REPO_URI:$image_name
           done
 
+  deploy:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      # Deployment steps
       - name: Clone Repository to EC2 and Start Containers
         run: |
+          # Decode the base64 encoded private key for use
+          echo "$EC2_PRIVATE_KEY_PATH_ENCODED" | base64 -d > ec2_private_key.pem
+
           # Set permissions for the private key file
-          chmod 400 $EC2_PRIVATE_KEY_PATH
+          chmod 400 ec2_private_key.pem
 
           # SSH into the EC2 instance and pull images
-          ssh -i $EC2_PRIVATE_KEY_PATH ec2-user@$EC2_PUBLIC_IP "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO_URI && docker pull $ECR_REPO_URI:latest"
+          ssh -i ec2_private_key.pem ec2-user@$EC2_PUBLIC_IP "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO_URI && docker pull $ECR_REPO_URI:latest"
 
           # SSH into the EC2 instance and start containers
-          ssh -i $EC2_PRIVATE_KEY_PATH ec2-user@$EC2_PUBLIC_IP 'cd /home/ec2-user/app && docker-compose up -d'
+          ssh -i ec2_private_key.pem ec2-user@$EC2_PUBLIC_IP 'cd /home/ec2-user/app && docker-compose up -d'
           echo "EC2 Public IP: $EC2_PUBLIC_IP"
-
