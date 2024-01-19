@@ -44,6 +44,7 @@ jobs:
           ecr_repo_uri=$(terraform output -raw repository_url)
           ec2_public_ip=$(terraform output ec2_instance_public_ip)
           ec2_private_key_path_encoded=$(echo "$(terraform output ec2_instance_private_key_path)" | base64 -w 0) 
+          ecr_repo_name=$(echo $ecr_repo_uri | cut -d'/' -f2) # Extracts "my-repo-name" from the full URI
 
           echo "Terraform Outputs:"
           echo "mlflow_db_endpoint=$mlflow_db_endpoint"
@@ -63,6 +64,7 @@ jobs:
           echo "REFERENCE_DATA_KEY_PATH=/reference" >> "$GITHUB_ENV"
           echo "DATA_PATH=../../data" >> "$GITHUB_ENV"
           echo "ECR_REPO_URI=$ecr_repo_uri" >> "$GITHUB_ENV"
+          echo "ECR_REPO_NAME=$ecr_repo_name" >> "$GITHUB_ENV" # Use this for tagging and pushing
           echo "EC2_PUBLIC_IP=$ec2_public_ip" >> "$GITHUB_ENV"
           echo "EC2_PRIVATE_KEY_PATH_ENCODED=$ec2_private_key_path_encoded" >> "$GITHUB_ENV" # Base64 encoded
 
@@ -92,8 +94,8 @@ jobs:
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO_URI
           # Tag and push each Docker image to ECR
           for image_name in fastapi_app streamlit_app detect_drift mlflow-server; do
-            docker tag $image_name:latest $ECR_REPO_URI/$image_name:latest
-            docker push $ECR_REPO_URI/$image_name:latest
+            docker tag $image_name:latest $ECR_REPO_NAME/$image_name:latest
+            docker push $ECR_REPO_NAME/$image_name:latest
           done
 
 
