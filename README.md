@@ -104,22 +104,22 @@ you will also have to edit the terraform files, specifically in the IAM module
 		{
 			"Effect": "Allow",
 			"Action": "secretsmanager:DescribeSecret",
-			"Resource": "arn:aws:secretsmanager:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:secret:*"
+			"Resource": "arn:aws:secretsmanager:us-east-2:579809454035:secret:*"
 		},
 		{
-			"Effect": "Allow",<YOUR_ACCOUNT_ID>
+			"Effect": "Allow",
 			"Action": [
 				"secretsmanager:CreateSecret",
 				"secretsmanager:DeleteSecret",
 				"secretsmanager:PutSecretValue",
 				"secretsmanager:GetSecretValue"
 			],
-			"Resource": "arn:aws:secretsmanager:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:secret:*"
+			"Resource": "arn:aws:secretsmanager:us-east-2:579809454035:secret:*"
 		},
 		{
 			"Effect": "Allow",
 			"Action": "secretsmanager:GetResourcePolicy",
-			"Resource": "arn:aws:secretsmanager:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:secret:*"
+			"Resource": "arn:aws:secretsmanager:us-east-2:579809454035:secret:*"
 		},
 		{
 			"Effect": "Allow",
@@ -137,11 +137,24 @@ you will also have to edit the terraform files, specifically in the IAM module
 				"rds:ListTagsForResource"
 			],
 			"Resource": [
-				"arn:aws:rds:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:pg:*",
-				"arn:aws:rds:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:db:*",
-				"arn:aws:rds:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:og:*",
-				"arn:aws:rds:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:subgrp:rds-subnet-group"
+				"arn:aws:rds:us-east-2:579809454035:pg:*",
+				"arn:aws:rds:us-east-2:579809454035:db:*",
+				"arn:aws:rds:us-east-2:579809454035:og:*",
+				"arn:aws:rds:us-east-2:579809454035:subgrp:rds-subnet-group"
 			]
+		},
+		{
+		    "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken",
+                "ecr:UploadLayerPart",
+                "ecr:InitiateLayerUpload",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage"
+            ],
+            "Resource": "*"
 		}
 	]
 }
